@@ -115,7 +115,8 @@ export default function UploadPage() {
 
     try {
       const res = await api.post('/reports/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 300000 // 5 minutes for large PDFs
       });
       navigate(`/report/${res.data.id}`);
     } catch (err) {
