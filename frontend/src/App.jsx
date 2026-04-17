@@ -62,7 +62,7 @@ function AppRoutes() {
 
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
-const GOOGLE_CLIENT_ID = "995681362096-5oafrith3u3qu7fcu4o3e5c51smcens0.apps.googleusercontent.com";
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 export default function App() {
   return (
