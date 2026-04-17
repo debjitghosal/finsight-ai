@@ -18,7 +18,7 @@ try:
 except ImportError:
     Groq = None
 
-_MODEL_NAME = "gemini-1.5-flash"
+_MODEL_NAME = "gemini-2.0-flash"
 _active_keys = []
 _invalid_keys = set()
 _key_lock = threading.Lock()
