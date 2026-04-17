@@ -2,6 +2,7 @@ import os
 import json
 import time
 import shutil
+import pdfplumber
 import pypdfium2
 from pathlib import Path
 from datetime import datetime

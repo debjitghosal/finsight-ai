@@ -626,25 +626,55 @@ def get_and_summarize_news(company_name: str, ticker: str = "") -> list[dict]:
         return []
 
 TICKER_DETECTION_PROMPT = """
-Identify the most likely Stock Ticker Symbol and Primary Exchange for the following company.
+Identify the most likely Stock Ticker Symbol, Primary Exchange, and Business Sector for the following company.
 Company Name: {company_name}
 
-Search your internal knowledge for the primary listing of this company.
-If it is an Indian company, use NSE or BSE. If US, use NASDAQ or NYSE.
-Return ONLY valid JSON:
-{{
-    "ticker": "SYMBOL",
-    "exchange": "NSE/BSE/NASDAQ/NYSE"
-}}
+For Indian companies listed on NSE, append .NS to the ticker symbol.
+For Indian companies listed on BSE, append .BO to the ticker symbol.
+Examples: Swiggy -> SWIGGY.NS, Reliance Industries -> RELIANCE.NS, Infosys -> INFY.NS
+For US companies, just use the raw symbol: Apple -> AAPL, Google -> GOOGL
+
+Return ONLY valid JSON with no markdown:
+{{"ticker": "SYMBOL", "exchange": "NSE/BSE/NASDAQ/NYSE", "sector": "Technology/Finance/Consumer/etc"}}
 """
 
 def detect_ticker(company_name: str) -> dict:
-    """Uses Gemini to deduce the stock ticker for a company name."""
+    """Detects stock ticker using yfinance first, then falls back to AI."""
+    import yfinance as yf
+
+    # Step 1: Try common NSE/BSE suffixes directly via yfinance
+    clean = company_name.strip().upper().replace(" ", "").replace("LIMITED", "").replace("LTD", "").replace(".", "")
+    candidates = [f"{clean}.NS", f"{clean}.BO"]
+    
+    for ticker_try in candidates:
+        try:
+            info = yf.Ticker(ticker_try).info
+            if info and (info.get("regularMarketPrice") or info.get("currentPrice") or info.get("symbol")):
+                exchange = "BSE" if ticker_try.endswith(".BO") else "NSE"
+                return {
+                    "ticker": ticker_try,
+                    "exchange": exchange,
+                    "sector": info.get("sector", "N/A")
+                }
+        except Exception:
+            pass
+
+    # Step 2: Fall back to AI for intelligent lookup
     res = _fast_generate(TICKER_DETECTION_PROMPT.format(company_name=company_name))
     try:
         match = re.search(r'\{.*\}', res, re.DOTALL)
         if match:
-            return json.loads(match.group(0))
+            data = json.loads(match.group(0))
+            # Verify with yfinance if possible
+            ticker = data.get("ticker", "")
+            if ticker:
+                try:
+                    info = yf.Ticker(ticker).info
+                    if info.get("sector"):
+                        data["sector"] = info["sector"]
+                except Exception:
+                    pass
+            return data
         return json.loads(res.strip())
-    except:
-        return {"ticker": "", "exchange": "NSE"}
+    except Exception:
+        return {"ticker": "", "exchange": "NSE", "sector": "N/A"}

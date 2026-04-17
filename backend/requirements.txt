@@ -23,7 +23,7 @@ google-cloud-speech
 google-cloud-texttospeech
 email-validator
 bcrypt==4.1.3
-
+pypdfium2
 python-dateutil
 fpdf2
 markdown
