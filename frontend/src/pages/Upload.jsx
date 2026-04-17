@@ -56,8 +56,7 @@ export default function UploadPage() {
     formData.append('file', selectedFile);
     try {
       const res = await api.post('/reports/metadata-scan', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-        timeout: 10000 // Increased to 10s for large-but-not-huge files
+        timeout: 10000
       });
       // Only override if the AI actually found something better and we didn't already have it
       if (res.data.company_name && !extractedCompany) setCompanyName(res.data.company_name);
@@ -115,8 +114,7 @@ export default function UploadPage() {
 
     try {
       const res = await api.post('/reports/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-        timeout: 300000 // 5 minutes for large PDFs
+        timeout: 300000 // 5 minutes for large PDFs - do NOT set Content-Type manually with FormData
       });
       navigate(`/report/${res.data.id}`);
     } catch (err) {
