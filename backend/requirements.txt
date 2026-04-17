@@ -1,0 +1,25 @@
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+python-jose
+passlib[bcrypt]
+python-multipart
+pydantic
+PyPDF2
+pdfplumber
+cryptography
+sentence-transformers
+scikit-learn
+numpy
+google-generativeai
+google-cloud-speech
+google-cloud-texttospeech
+email-validator
+
+pip uninstall -y bcrypt
+bcrypt==4.1.3
+
+python-dateutil
+fpdf2
+markdown
