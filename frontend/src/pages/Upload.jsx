@@ -56,6 +56,7 @@ export default function UploadPage() {
     formData.append('file', selectedFile);
     try {
       const res = await api.post('/reports/metadata-scan', formData, {
+        headers: { 'Content-Type': undefined }, // Let browser set multipart boundary
         timeout: 10000
       });
       // Only override if the AI actually found something better and we didn't already have it
@@ -114,7 +115,8 @@ export default function UploadPage() {
 
     try {
       const res = await api.post('/reports/upload', formData, {
-        timeout: 300000 // 5 minutes for large PDFs - do NOT set Content-Type manually with FormData
+        headers: { 'Content-Type': undefined }, // Must override global json default so browser sets multipart boundary
+        timeout: 300000
       });
       navigate(`/report/${res.data.id}`);
     } catch (err) {
