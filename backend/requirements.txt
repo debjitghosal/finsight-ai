@@ -16,8 +16,6 @@ google-generativeai
 google-cloud-speech
 google-cloud-texttospeech
 email-validator
-
-pip uninstall -y bcrypt
 bcrypt==4.1.3
 
 python-dateutil
