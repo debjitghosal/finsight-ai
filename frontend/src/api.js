@@ -3,7 +3,6 @@ import axios from 'axios';
 const api = axios.create({
   baseURL: 'https://finsight-ai-ijpw.onrender.com', // HARDCODED for production reliability
   timeout: 60000,
-  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },

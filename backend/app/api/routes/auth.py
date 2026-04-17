@@ -84,12 +84,15 @@ def google_login(payload: dict, db: Session = Depends(get_db)):
         return {
             "access_token": access_token, 
             "token_type": "bearer", 
-            "user": UserRead.from_orm(user),
+            "user": UserRead.model_validate(user),
             "onboarding_required": onboarding_required
         }
         
-    except ValueError:
-        raise HTTPException(status_code=401, detail="Invalid Google token")
+    except Exception as e:
+        import traceback
+        print(f"LOGIN_ERROR: {str(e)}")
+        traceback.print_exc()
+        raise HTTPException(status_code=401, detail=f"Authentication failed: {str(e)}")
 
 @router.patch("/username", response_model=UserRead)
 def update_username(
