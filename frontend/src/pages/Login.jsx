@@ -37,7 +37,7 @@ export default function Login() {
     try {
       if (isLogin) {
         await login(email, password);
-        navigate('/');
+        navigate('/dashboard');
       } else {
         if (username.length < 4) {
           setError('Handle must be at least 4 characters.');
@@ -45,7 +45,7 @@ export default function Login() {
           return;
         }
         await register(name, email, password, username);
-        navigate('/');
+        navigate('/dashboard');
       }
     } catch (err) {
       const detail = err.response?.data?.detail || '';
@@ -124,7 +124,7 @@ export default function Login() {
                   if (data?.onboarding_required) {
                     navigate('/setup-username');
                   } else {
-                    navigate('/');
+                    navigate('/dashboard');
                   }
                 } catch {
                   setError('Google Authentication Failed. Please try again.');
