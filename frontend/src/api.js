@@ -3,10 +3,9 @@ import axios from 'axios';
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
   timeout: 60000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
 });
+
+console.log('DEBUG: API Base URL is:', api.defaults.baseURL);
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
