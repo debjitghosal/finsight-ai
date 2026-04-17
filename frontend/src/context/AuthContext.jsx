@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }) => {
           const res = await api.get('/auth/me');
           setUser(res.data);
         } catch (error) {
+          console.error("DEBUG: Authentication Check Failed:", error.response?.data || error.message);
           localStorage.removeItem('token');
         }
       }
@@ -43,10 +44,16 @@ export const AuthProvider = ({ children }) => {
   };
 
   const googleLogin = async (credential) => {
-    const res = await api.post('/auth/google', { credential });
-    localStorage.setItem('token', res.data.access_token);
-    setUser(res.data.user);
-    return res.data; // Return the response so caller can check onboarding_required
+    try {
+      console.log("DEBUG: Attempting Google Login with Backend...");
+      const res = await api.post('/auth/google', { credential });
+      localStorage.setItem('token', res.data.access_token);
+      setUser(res.data.user);
+      return res.data;
+    } catch (error) {
+      console.error("DEBUG: Google Login Backend Error:", error.response?.data || error.message);
+      throw error;
+    }
   };
 
   const logout = () => {
