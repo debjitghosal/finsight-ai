@@ -14,7 +14,7 @@ cryptography
 sentence-transformers
 scikit-learn
 numpy
-google-generativeai
+google-genai
 google-cloud-speech
 google-cloud-texttospeech
 email-validator
