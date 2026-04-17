@@ -34,8 +34,12 @@ export const AuthProvider = ({ children }) => {
     });
     
     localStorage.setItem('token', res.data.access_token);
-    const userRes = await api.get('/auth/me');
-    setUser(userRes.data);
+    try {
+      const userRes = await api.get('/auth/me');
+      setUser(userRes.data);
+    } catch (err) {
+      console.error("DEBUG: Auto-fetch user after login failed:", err);
+    }
   };
 
   const register = async (name, email, password, username) => {
