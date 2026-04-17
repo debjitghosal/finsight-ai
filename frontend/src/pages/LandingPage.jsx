@@ -19,7 +19,7 @@ export default function LandingPage() {
 
   // Redirect to dashboard if already logged in
   if (user) {
-    return <Navigate to="/" />;
+    return <Navigate to="/dashboard" />;
   }
 
   const features = [

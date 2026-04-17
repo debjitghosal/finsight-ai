@@ -20,7 +20,7 @@ export default function Login() {
 
   if (user) {
     if (!user.username) return <Navigate to="/setup-username" />;
-    return <Navigate to="/" />;
+    return <Navigate to="/dashboard" />;
   }
 
   const switchToRegister = (prefillEmail = '') => {
