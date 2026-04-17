@@ -110,13 +110,6 @@ export default function LandingPage() {
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
             <div className="flex items-center gap-4 text-slate-500 font-medium">
-              <div className="flex -space-x-2">
-                {[1,2,3,4].map(i => (
-                  <div key={i} className="w-8 h-8 rounded-full border-2 border-[var(--bg-deep)] bg-dark-800 flex items-center justify-center text-[10px] font-bold">
-                    AI
-                  </div>
-                ))}
-              </div>
               <span>Trusted by analysts worldwide</span>
             </div>
           </div>
@@ -167,7 +160,7 @@ export default function LandingPage() {
             <p className="text-indigo-200 text-lg md:text-xl mb-10 max-w-2xl mx-auto opacity-80">
               Join the new era of financial research. Fully automated, incredibly fast, and powered by the world's best AI.
             </p>
-            <Link to="/login" className="bg-white text-dark-950 hover:bg-slate-200 px-10 py-5 rounded-2xl font-black text-xl transition-all shadow-2xl shadow-indigo-500/20 active:scale-95 inline-block">
+            <Link to="/login" className="bg-white text-black hover:bg-slate-200 px-10 py-5 rounded-2xl font-black text-xl transition-all shadow-2xl shadow-indigo-500/20 active:scale-95 inline-block">
               Deploy FinSight AI
             </Link>
           </div>
