@@ -14,7 +14,11 @@ def get_live_price(ticker: str, exchange: str = "NSE") -> Optional[Dict]:
         elif exchange.upper() == "BSE":
             suffix = ".BO"
         
-        yf_ticker = f"{ticker.upper()}{suffix}"
+        # If ticker already has the suffix, don't add it again
+        if ticker.upper().endswith(".NS") or ticker.upper().endswith(".BO"):
+            yf_ticker = ticker.upper()
+        else:
+            yf_ticker = f"{ticker.upper()}{suffix}"
         stock = yf.Ticker(yf_ticker)
         
         # Get current data

@@ -11,9 +11,6 @@ python-dotenv
 PyPDF2
 pdfplumber
 cryptography
-sentence-transformers
-scikit-learn
-numpy
 google-genai
 groq
 twilio

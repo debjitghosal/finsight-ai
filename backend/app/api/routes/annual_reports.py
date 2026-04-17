@@ -59,7 +59,7 @@ def process_report_background(report_id: int, user_id: int, file_path: str):
 
     try:
         # Phase 0: Extraction
-        update_status("processing:parsing_text")
+        update_status("proc:parsing")
         text = ""
         try:
             import pypdfium2 as pdfium
@@ -79,7 +79,7 @@ def process_report_background(report_id: int, user_id: int, file_path: str):
             text = "PDF Content Extraction Failed."
 
         # Phase 1: Structuring
-        update_status("processing:init")
+        update_status("proc:init")
         
         print(f"[{datetime.now()}] STARTING ANALYSIS for Report {report_id}...")
 
@@ -113,10 +113,10 @@ def process_report_background(report_id: int, user_id: int, file_path: str):
         fin_data = results.get("fin_pipeline") or {}
         ai_summary = results.get("sum") or "Summary generation failed."
 
-        update_status("processing:summary_done")
+        update_status("proc:summary")
         
         # Phase 2: Synthesis
-        update_status("processing:insights")
+        update_status("proc:insights")
         invest_insight = get_investment_advice(fin_data, ai_summary)
 
         detected_company = fin_data.get("company_name", "")
@@ -124,7 +124,7 @@ def process_report_background(report_id: int, user_id: int, file_path: str):
         detected_year_str = str(detected_year_val) if detected_year_val else None
 
         # Phase 3: Committal
-        update_status("processing:finalizing")
+        update_status("proc:finalizing")
         fin_data_str = json.dumps(fin_data)
         
         crud_annual_report.update_report_analysis(
