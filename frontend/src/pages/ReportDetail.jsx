@@ -383,8 +383,8 @@ export default function ReportDetail() {
           )}
           
           <div className="flex items-center gap-3">
-            {/* Re-Analyze button - shows when data seems empty */}
-            {report.status === 'done' && !finData.revenue && (
+            {/* Re-Analyze button - shows when data seems empty or N/A */}
+            {report.status === 'done' && (!finData.revenue || finData.revenue === 'N/A') && (
               <button
                 onClick={handleReanalyze}
                 disabled={reanalyzing}
