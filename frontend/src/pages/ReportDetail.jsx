@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { 
   ArrowLeft, Download, MessageSquare, AlertCircle, Loader2, 
   TrendingUp, Activity, FileText, CheckCircle2, DollarSign, Target, PieChart,
-  ExternalLink, Search
+  ExternalLink, Search, RefreshCw
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import api from '../api';
@@ -105,6 +105,7 @@ export default function ReportDetail() {
   const [autoDetectLoading, setAutoDetectLoading] = useState(false);
   const [ltpData, setLtpData] = useState(null);
   const [smoothPercent, setSmoothPercent] = useState(0);
+  const [reanalyzing, setReanalyzing] = useState(false);
 
   const isProcessing = report?.status && report.status.startsWith('processing');
   
@@ -297,6 +298,22 @@ export default function ReportDetail() {
     }
   };
 
+  const handleReanalyze = async () => {
+    if (!window.confirm('This will re-run the full AI analysis on this report. This may take a few minutes. Continue?')) return;
+    setReanalyzing(true);
+    try {
+      await api.post(`/reports/${id}/reanalyze`);
+      // Reload the report after a brief pause to let backend update status
+      setTimeout(() => {
+        fetchReport();
+        setReanalyzing(false);
+      }, 1500);
+    } catch (err) {
+      alert(err.response?.data?.detail || 'Re-analysis failed. The original PDF may not be available on the server.');
+      setReanalyzing(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col justify-center items-center h-[70vh]">
@@ -346,7 +363,7 @@ export default function ReportDetail() {
           </h1>
           <p className="text-sm font-bold text-[var(--text-muted)] mt-1 flex items-center gap-2">
             <FileText className="w-4 h-4" />
-            {report.file_name} • Analysed {new Date(report.processed_at).toLocaleDateString()}
+            {report.file_name} • Analysed {new Date(report.processed_at || report.uploaded_at).toLocaleDateString()}
           </p>
         </div>
         
@@ -366,6 +383,17 @@ export default function ReportDetail() {
           )}
           
           <div className="flex items-center gap-3">
+            {/* Re-Analyze button - shows when data seems empty */}
+            {report.status === 'done' && !finData.revenue && (
+              <button
+                onClick={handleReanalyze}
+                disabled={reanalyzing}
+                className="hidden md:flex items-center gap-2 px-4 py-2 bg-violet-500/10 hover:bg-violet-600/20 border border-violet-500/30 text-violet-400 rounded-lg transition-all text-sm font-bold"
+              >
+                {reanalyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                {reanalyzing ? 'Re-analyzing...' : 'Re-Analyze'}
+              </button>
+            )}
             {finData.ticker && (
             <a
               href={`https://www.screener.in/company/${(finData.ticker || "").split('.')[0].split(':')[1] || (finData.ticker || "").split('.')[0].split(':')[0].trim().toUpperCase()}/`}

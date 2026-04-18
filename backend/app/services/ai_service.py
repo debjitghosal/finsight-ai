@@ -4,6 +4,7 @@ AI Service — Gemini 1.5 Pro powered financial analysis engine.
 from __future__ import annotations
 import json
 import re
+import urllib.parse
 from typing import Optional
 from google import genai
 from app.core.config import settings
@@ -193,85 +194,101 @@ def _fast_generate_stream(prompt: str):
 
 
 PNL_EXTRACTION_PROMPT = """
-You are a senior financial analyst. Extract PnL (Profit & Loss) data as JSON only.
-Include currency/scale (e.g. "100 Million USD").
+You are a senior financial analyst. Read the text below and extract the Profit & Loss figures.
+CRITICAL: Replace each field with REAL extracted values including currency and scale. NEVER output 'string' or placeholder text.
+If a value is not present, use JSON null.
+Output ONLY valid JSON:
 {{
-  "revenue": "string",
-  "net_profit": "string",
-  "gross_profit": "string",
-  "ebitda": "string",
-  "eps": "string",
-  "revenue_growth": "string",
-  "profit_margin": "string"
+  "revenue": "<e.g. Rs. 3,552 Crore>",
+  "net_profit": "<e.g. Rs. 351 Crore or loss of Rs. 123 Crore>",
+  "gross_profit": "<actual gross profit>",
+  "ebitda": "<actual EBITDA>",
+  "eps": "<e.g. Rs. 2.50 per share>",
+  "revenue_growth": "<e.g. 35.2% YoY>",
+  "profit_margin": "<e.g. 9.8%>"
 }}
 Text: {text}
 """
 
 BALANCE_SHEET_PROMPT = """
-Extract Balance Sheet data as JSON only.
-Include currency/scale.
+You are a senior financial analyst. Read the text and extract Balance Sheet figures.
+CRITICAL: Replace each field with REAL extracted values including currency and scale. NEVER output 'string' or placeholder text.
+If a value is not present, use JSON null.
+Output ONLY valid JSON:
 {{
-  "total_assets": "string",
-  "total_liabilities": "string",
-  "equity": "string",
-  "debt_to_equity": "string",
-  "current_ratio": "string",
-  "return_on_equity": "string",
-  "return_on_assets": "string"
+  "total_assets": "<actual total assets with currency>",
+  "total_liabilities": "<actual total liabilities>",
+  "equity": "<actual shareholders equity>",
+  "debt_to_equity": "<actual D/E ratio>",
+  "current_ratio": "<actual current ratio>",
+  "return_on_equity": "<actual ROE %>",
+  "return_on_assets": "<actual ROA %>"
 }}
 Text: {text}
 """
 
 HIGHLIGHTS_PROMPT = """
-Extract non-numeric highlights and risks as JSON only.
+You are a senior financial analyst. Read the text and extract company highlights and risks.
+CRITICAL: Replace each field with REAL extracted values. NEVER output 'string' or placeholder text.
+If a value is not present, use JSON null.
+Output ONLY valid JSON:
 {{
-  "company_name": "string",
-  "fiscal_year": "string",
-  "key_business_segments": [],
-  "major_risks": [],
-  "key_highlights": [],
-  "operating_cash_flow": "string"
+  "company_name": "<exact legal company name>",
+  "fiscal_year": "<e.g. 2024-25>",
+  "key_business_segments": ["<segment 1>", "<segment 2>", "<segment 3>"],
+  "major_risks": ["<risk 1>", "<risk 2>", "<risk 3>"],
+  "key_highlights": ["<highlight 1>", "<highlight 2>", "<highlight 3>"],
+  "operating_cash_flow": "<actual operating cash flow with currency>"
 }}
 Text: {text}
 """
 
 FINANCIAL_PIPELINE_PROMPT = """
-You are a senior hedge fund analyst. Extract ALL requested financial data from the text as a single JSON object.
-Ensure currency/scale is included in all string values.
-IMPORTANT: Prioritize the LISTED ENTITY NAME and its actual stock ticker. For example, if the document is from Zomato, be aware that the listed parent is now 'ETERNAL LIMITED' (ticker: ETERNAL). Use your internal knowledge of recent corporate rebranding/restructuring to provide the most accurate listing details.
+You are a senior hedge fund analyst. Your task is to READ the Annual Report text below and EXTRACT real financial data.
 
+CRITICAL RULES — READ CAREFULLY:
+1. You MUST replace every field with an ACTUAL VALUE found in the document.
+2. NEVER output placeholder words like "string", "null", "N/A", "unknown", or any description.
+3. If a specific value is truly not present in the text, set that field to JSON null (not the word "null").
+4. Include currency and scale with every monetary value (e.g., "Rs. 17,942 Crore", "$4.2 Billion", "12.5%").
+5. For stock_ticker: find the actual NSE/BSE/NASDAQ symbol. Add .NS suffix for NSE, .BO for BSE.
+6. If this is a Zomato/Blinkit report, the listed entity is ETERNAL LIMITED (ticker: ETERNAL.NS on NSE).
+7. Output ONLY valid JSON. No explanation, no markdown, no code fences.
+
+Output this exact JSON structure with REAL extracted values:
 {{
   "pnl": {{
-    "revenue": "string",
-    "net_profit": "string",
-    "gross_profit": "string",
-    "ebitda": "string",
-    "eps": "string",
-    "revenue_growth": "string",
-    "profit_margin": "string"
+    "revenue": "<actual revenue figure with currency and scale>",
+    "net_profit": "<actual net profit/loss figure>",
+    "gross_profit": "<actual gross profit figure>",
+    "ebitda": "<actual EBITDA figure>",
+    "eps": "<actual earnings per share>",
+    "revenue_growth": "<actual YoY growth percentage>",
+    "profit_margin": "<actual net margin percentage>"
   }},
   "balance_sheet": {{
-    "total_assets": "string",
-    "total_liabilities": "string",
-    "equity": "string",
-    "debt_to_equity": "string",
-    "current_ratio": "string",
-    "return_on_equity": "string",
-    "return_on_assets": "string"
+    "total_assets": "<actual total assets>",
+    "total_liabilities": "<actual total liabilities>",
+    "equity": "<actual shareholders equity>",
+    "debt_to_equity": "<actual ratio>",
+    "current_ratio": "<actual ratio>",
+    "return_on_equity": "<actual ROE percentage>",
+    "return_on_assets": "<actual ROA percentage>"
   }},
   "metadata": {{
-    "company_name": "string",
-    "fiscal_year": "string",
-    "stock_ticker": "string (e.g. AAPL, RELIANCE, TCS)",
-    "primary_exchange": "string (NSE, BSE, NASDAQ, or NYSE)",
-    "key_business_segments": [],
-    "major_risks": [],
-    "key_highlights": [],
-    "operating_cash_flow": "string"
+    "company_name": "<exact legal company name>",
+    "fiscal_year": "<fiscal year e.g. 2024-25>",
+    "stock_ticker": "<exchange symbol e.g. SWIGGY.NS>",
+    "primary_exchange": "<NSE or BSE or NASDAQ or NYSE>",
+    "key_business_segments": ["<segment 1>", "<segment 2>", "<segment 3>"],
+    "major_risks": ["<risk 1>", "<risk 2>", "<risk 3>"],
+    "key_highlights": ["<highlight 1>", "<highlight 2>", "<highlight 3>"],
+    "operating_cash_flow": "<actual operating cash flow figure>"
   }}
 }}
 
-Text: {text}
+Annual Report Text:
+{text}
 """
 
 def extract_pnl_data(text: str) -> dict:
@@ -300,28 +317,57 @@ def extract_financial_pipeline(text: str) -> dict:
     raw = _safe_generate(FINANCIAL_PIPELINE_PROMPT.format(text=str(text or "")[:950000]))
     try:
         match = re.search(r'\{.*\}', str(raw), re.DOTALL)
-        if not match: return {}
+        if not match:
+            print("WARNING: Pipeline returned no JSON match, falling back to separate calls...")
+            return _fallback_pipeline(text)
         data = json.loads(match.group(0))
-        # Flatten the structure to match existing expectations
-        return {
+        
+        # If top-level keys are missing or data is clearly garbage, fallback
+        if not data.get("pnl") and not data.get("balance_sheet") and not data.get("metadata"):
+            # Maybe AI returned flat JSON instead of nested
+            if data.get("revenue") or data.get("company_name"):
+                # Already flat, just use it directly
+                return _normalize_pipeline_result(data)
+            print("WARNING: Pipeline JSON missing expected keys, falling back...")
+            return _fallback_pipeline(text)
+        
+        res = {
             **(data.get("pnl") or {}),
             **(data.get("balance_sheet") or {}),
             **(data.get("metadata") or {}),
             "ticker": data.get("metadata", {}).get("stock_ticker"),
             "exchange": data.get("metadata", {}).get("primary_exchange")
         }
-        
-        # Smart Ticker Mapping for Zomato -> Eternal Rebranding
-        c_name = str(res.get("company_name", "")).lower()
-        if "zomato" in c_name or "blinkit" in c_name or "eternal" in c_name:
-            # Force the new listing entity details
-            res["ticker"] = "ETERNAL"
-            res["exchange"] = "NSE"
-            if not res.get("company_name") or "zomato" in str(res["company_name"]).lower():
-                res["company_name"] = "Eternal Limited (Zomato)"
-        
-        return res
-    except: return {}
+        return _normalize_pipeline_result(res)
+    except Exception as e:
+        print(f"WARNING: Pipeline JSON parse error: {e}, falling back...")
+        return _fallback_pipeline(text)
+
+def _normalize_pipeline_result(res: dict) -> dict:
+    """Post-process result: apply Zomato->Eternal rebranding, clean up N/A strings."""
+    # Smart Ticker Mapping for Zomato -> Eternal Rebranding
+    c_name = str(res.get("company_name", "")).lower()
+    if "zomato" in c_name or "blinkit" in c_name or "eternal" in c_name:
+        res["ticker"] = "ETERNAL.NS"
+        res["exchange"] = "NSE"
+        if not res.get("company_name") or "zomato" in str(res["company_name"]).lower():
+            res["company_name"] = "Eternal Limited (Zomato)"
+    
+    # Strip placeholder 'string' values from the AI (it literally echoes the schema description)
+    for k, v in list(res.items()):
+        if str(v).strip().lower() in ["string", "null", "none", "", "n/a"]:
+            res[k] = None
+    
+    return res
+
+def _fallback_pipeline(text: str) -> dict:
+    """Sequential fallback: run PnL, Balance Sheet, and Highlights separately."""
+    print("INFO: Running fallback pipeline (separate calls)...")
+    pnl = extract_pnl_data(text)
+    bs = extract_balance_sheet_data(text)
+    high = extract_highlights_data(text)
+    combined = {**pnl, **bs, **high}
+    return _normalize_pipeline_result(combined)
 
 def extract_financial_data(text: str) -> dict:
     # Legacy wrapper if needed, but we typically use parallel now

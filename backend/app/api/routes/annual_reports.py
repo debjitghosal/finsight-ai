@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.api.deps import get_current_user
+from app.core.config import settings
 
 from app.models.user import User
 from app.models.annual_report import AnnualReport
@@ -59,7 +60,7 @@ def process_report_background(report_id: int, user_id: int, file_path: str):
 
     try:
         # Phase 0: Extraction
-        update_status("proc:parsing")
+        update_status("processing:parsing_text")
         text = ""
         try:
             import pypdfium2 as pdfium
@@ -79,7 +80,7 @@ def process_report_background(report_id: int, user_id: int, file_path: str):
             text = "PDF Content Extraction Failed."
 
         # Phase 1: Structuring
-        update_status("proc:init")
+        update_status("processing:init")
         
         print(f"[{datetime.now()}] STARTING ANALYSIS for Report {report_id}...")
 
@@ -113,10 +114,10 @@ def process_report_background(report_id: int, user_id: int, file_path: str):
         fin_data = results.get("fin_pipeline") or {}
         ai_summary = results.get("sum") or "Summary generation failed."
 
-        update_status("proc:summary")
+        update_status("processing:summary_done")
         
         # Phase 2: Synthesis
-        update_status("proc:insights")
+        update_status("processing:insights")
         invest_insight = get_investment_advice(fin_data, ai_summary)
 
         detected_company = fin_data.get("company_name", "")
@@ -124,7 +125,7 @@ def process_report_background(report_id: int, user_id: int, file_path: str):
         detected_year_str = str(detected_year_val) if detected_year_val else None
 
         # Phase 3: Committal
-        update_status("proc:finalizing")
+        update_status("processing:finalizing")
         fin_data_str = json.dumps(fin_data)
         
         crud_annual_report.update_report_analysis(
@@ -631,3 +632,30 @@ def get_live_ltp(
     from app.services import stock_service
     price_data = stock_service.get_live_price(ticker, exchange)
     return price_data
+
+
+@router.post("/{report_id}/reanalyze")
+async def reanalyze_report(
+    report_id: int,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Re-trigger AI analysis for an existing report. Useful for fixing N/A data."""
+    report = crud_annual_report.get_annual_report(db, report_id, current_user.id)
+    if not report:
+        raise HTTPException(status_code=404, detail="Report not found")
+    
+    # Check if the original PDF still exists
+    file_path = Path("uploads") / f"report_{report.id}.pdf"
+    if not file_path.exists():
+        raise HTTPException(status_code=400, detail="Original PDF file not found on server. Please re-upload.")
+    
+    # Reset status to trigger re-analysis
+    report.status = "pending"
+    report.error_message = None
+    db.commit()
+    
+    background_tasks.add_task(process_report_background, report.id, current_user.id, str(file_path))
+    
+    return {"status": "reanalyzing", "message": "Analysis restarted. Please wait and refresh the page."}
