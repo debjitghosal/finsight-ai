@@ -363,7 +363,7 @@ export default function ReportDetail() {
           </h1>
           <p className="text-sm font-bold text-[var(--text-muted)] mt-1 flex items-center gap-2">
             <FileText className="w-4 h-4" />
-            {report.file_name} • Analysed {new Date(report.processed_at || report.uploaded_at).toLocaleDateString()}
+            {report.file_name} • Analysed {new Date(report.processed_at || report.uploaded_at).toLocaleDateString('en-GB')}
           </p>
         </div>
         
