@@ -40,6 +40,15 @@ app.include_router(annual_reports_router)  # Mounted!
 def on_startup():
     Base.metadata.create_all(bind=engine)
     
+    # Safely alter the status column on Postgres for the longer status strings
+    try:
+        from sqlalchemy import text
+        with engine.begin() as conn:
+            if engine.dialect.name == 'postgresql':
+                conn.execute(text("ALTER TABLE annual_reports ALTER COLUMN status TYPE VARCHAR(50);"))
+    except Exception as e:
+        print(f"Startup DB alteration skipped: {e}")
+    
     # Ensure static dirs exist
     os.makedirs("uploads", exist_ok=True)
     os.makedirs("outputs", exist_ok=True)

@@ -21,8 +21,8 @@ class AnnualReport(Base):
     financial_data_json = Column(Text, nullable=True)   # JSON string
     investment_insight = Column(Text, nullable=True)
 
-    # Status: pending | processing | done | error
-    status = Column(String(20), default="pending")
+    # Status: pending | processing:parsing_text | etc.
+    status = Column(String(50), default="pending")
     error_message = Column(Text, nullable=True)
 
     uploaded_at = Column(DateTime(timezone=True), server_default=func.now())
