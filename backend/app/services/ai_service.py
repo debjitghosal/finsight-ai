@@ -95,9 +95,26 @@ def _safe_generate(prompt: str, max_retries: int = 3) -> str:
                     print(f"Failed after max retries on key [{key[:8]}...]: {err_str}")
                     break # Try next key
     
-    # If we exhausted ALL keys and still haven't returned, sleep briefly as a last resort
-    print("ALL KEYS EXHAUSTED. Cooling down 10s...")
-    time.sleep(10)
+    # If we exhausted ALL keys, fallback to Groq as requested
+    print("ALL GEMINI KEYS EXHAUSTED. Cascading to Groq Backup...")
+    if Groq:
+        try:
+            # Use the provided backup key or the one from settings
+            backup_key = settings.GROQ_API_KEY or "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"
+            # Truncate prompt to fit Llama 3 70B (128k context ~ 400k chars max)
+            truncated_prompt = prompt[:350000]
+            client = Groq(api_key=backup_key)
+            completion = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[{"role": "system", "content": "You are a senior financial analyst. Output ONLY requested JSON."},
+                          {"role": "user", "content": truncated_prompt}],
+                temperature=0.1
+            )
+            return completion.choices[0].message.content
+        except Exception as groq_e:
+            print(f"Groq Backup also failed: {groq_e}")
+            
+    print("ALL AI ENGINES EXHAUSTED. Failing gracefully.")
     return ""
 
 def _fast_generate(prompt: str) -> str:

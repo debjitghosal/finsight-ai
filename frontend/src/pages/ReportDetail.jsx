@@ -613,7 +613,7 @@ export default function ReportDetail() {
                           {item.title.split(' - ')[0]}
                         </a>
                         <span className="text-[10px] uppercase font-black tracking-widest text-[var(--text-muted)] bg-[var(--glass-tint)] px-3 py-1.5 rounded-lg border border-[var(--border-subtle)] shrink-0">
-                          {item.date ? new Date(item.date).toLocaleDateString() : 'REALTIME'}
+                          {item.date ? new Date(item.date).toLocaleDateString('en-GB') : 'REALTIME'}
                         </span>
                       </div>
                       <p className="text-[var(--text-muted)] text-sm font-bold leading-relaxed mb-6 italic border-l-4 border-emerald-500/20 pl-5 py-2">
