@@ -9,6 +9,7 @@ load_dotenv(override=True)
 class Settings(BaseSettings):
     # App
     PROJECT_NAME: str = "FinSight AI"
+    FRONTEND_URL: str = "http://localhost:5173"
 
     # Database
     # Default to SQLite for local development; will use PostgreSQL in production

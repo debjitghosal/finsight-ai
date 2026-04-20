@@ -7,6 +7,7 @@ import pypdfium2
 from pathlib import Path
 from datetime import datetime
 from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, BackgroundTasks, Response
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -347,7 +348,6 @@ def multi_ask_question(
         "answer": answer
     }
 
-from fastapi.responses import StreamingResponse
 
 @router.post("/multi-ask-stream")
 def multi_ask_question_stream(

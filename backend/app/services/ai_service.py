@@ -571,12 +571,9 @@ def generate_investment_insight(financial_data: dict, summary: str) -> str:
     return _fast_generate(INVESTMENT_PROMPT.format(financial_json=json.dumps(financial_data), summary=s))
 
 def generate_whatsapp_summary(financial_data: dict, summary: str, report_id: int) -> str:
-    """Fulfills WhatsApp summary requests with a direct link and high-impact formatting."""
+    """Fulfills WhatsApp summary requests with high-impact formatting."""
     data_ctx = json.dumps(financial_data, indent=2)
-    # Construct a back-link for the mobile user
-    backend_url = getattr(settings, "BACKEND_URL", "http://localhost:8000")
-    url = f"{backend_url}/reports/{report_id}"
-    res = _fast_generate(WHATSAPP_PROMPT.format(data=data_ctx, summary=summary or "", report_url=url))
+    res = _fast_generate(WHATSAPP_PROMPT.format(data=data_ctx, summary=summary or ""))
     # Ensure it's not empty, fallback to raw summary snippet if AI fails
     if not res:
         return (summary or "Market Report Analyst: Financial summaries are currently being processed.")[:800]
@@ -602,7 +599,7 @@ Template:
 • [Risk 1]
 • [Risk 2]
 
-*🔗 Full Report:* {report_url}
+*Disclaimer:* This is AI-generated advice. We are not SEBI registered.
 
 Data Context: {data}"""
 

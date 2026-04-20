@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://finsight-ai-ijpw.onrender.com', // HARDCODED for production reliability
+  baseURL: import.meta.env.VITE_API_URL || 'https://finsight-ai-ijpw.onrender.com',
   timeout: 60000,
   headers: {
     'Content-Type': 'application/json',
