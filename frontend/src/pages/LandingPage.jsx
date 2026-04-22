@@ -12,8 +12,14 @@ import {
   Database,
   Cpu
 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-
+/**
+ * LandingPage Component
+ * 
+ * The primary entry point for unauthenticated users. Features a high-conversion 
+ * hero section, institutional feature grid, and framer-motion powered animations.
+ * 
+ * @returns {JSX.Element} The rendered landing page.
+ */
 export default function LandingPage() {
   const { user } = useAuth();
 
