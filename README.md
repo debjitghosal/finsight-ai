@@ -1,7 +1,8 @@
 # FinSight AI: Advanced Financial Intelligence Engine
 
-[![CI/CD Pipeline](https://img.shields.io/github/actions/workflow/status/your-repo/main.yml?branch=main&label=CI%2FCD&logo=github)](https://github.com/your-repo/actions)
+[![CI/CD Pipeline](https://img.shields.io/github/actions/workflow/status/debjitghosal/finsight-ai/ci.yml?branch=main&label=CI%2FCD&logo=github)](https://github.com/debjitghosal/finsight-ai/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Live Demo](https://img.shields.io/badge/Demo-Live-brightgreen.svg)](https://finsight-ai-smoky.vercel.app/)
 
 **FinSight AI** is a production-grade financial report analyzer that converts complex, multi-hundred-page Annual Reports (PDFs) into structured, institutional-quality investment data. It leverages a hybrid AI architecture (Google Gemini 1.5 + Groq) for high-speed, parallelized data extraction and zero-hallucination document Q&A.
 
