@@ -59,19 +59,15 @@ graph TD
 
 ## 🛠️ Technology Stack
 
-### **Backend (Python)**
-- **Framework**: FastAPI (High-performance API)
-- **Database**: SQLAlchemy (ORM) with PostgreSQL (Neon.tech)
-- **AI Core**: `google-genai` (Gemini 1.5) & `groq` (Llama 3 Fallback)
-- **PDF Extraction**: `pypdfium2` / `pdfplumber`
-- **Export Services**: `fpdf2` (PDF Reports) & `openpyxl` (Excel Models)
-
-### **Frontend (React)**
-- **Framework**: Vite + React
-- **Styling**: Vanilla CSS + Tailwind (Modern Glassmorphism)
-- **Animations**: Framer Motion
-- **Icons**: Lucide React
-- **Data Fetching**: Axios + EventSource (Streaming)
+| Layer | Technologies Used | Key Purpose for Demo |
+| :--- | :--- | :--- |
+| **Frontend** | **React (Vite) + TypeScript** | Blazing-fast navigation and state management. |
+| **Styling** | **Vanilla CSS + Tailwind CSS** | Ultra-modern "Glassmorphism" & "Institutional" UI. |
+| **Animations** | **Framer Motion** | Silky-smooth transitions and entry effects (crucial for "wow" factor). |
+| **Visuals** | **Recharts + Lucide React** | Dynamic financial charting and high-precision iconography. |
+| **Backend** | **FastAPI (Python)** | High-performance asynchronous API for real-time data flow. |
+| **Database** | **PostgreSQL (Neon.tech)** | Serverless cloud database for user reports and analysis. |
+| **Real-time** | **SSE (Server-Sent Events)** | Enables the "word-by-word" typing effect in the AI chatbot. |
 
 ---
 
