@@ -2,8 +2,15 @@ import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UploadCloud, File, X, Loader2, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
-import api from '../api';
-
+/**
+ * UploadPage Component
+ * 
+ * Handles the ingestion of PDF annual reports. Includes a "Fast Scan" feature 
+ * that instantly extracts company identity and report year from the filename 
+ * and hidden PDF metadata before the primary analysis begins.
+ * 
+ * @returns {JSX.Element} The rendered upload interface.
+ */
 export default function UploadPage() {
   const navigate = useNavigate();
   const [file, setFile] = useState(null);
