@@ -3,8 +3,18 @@ from typing import Optional, Dict
 
 def get_live_price(ticker: str, exchange: str = "NSE") -> Optional[Dict]:
     """
-    Fetches the Last Traded Price (LTP) and day change for a given ticker.
-    Maps Indian exchanges to Yahoo Finance format.
+    Fetches the Last Traded Price (LTP) and market performance for a given stock ticker.
+
+    This service maps Indian exchanges (NSE/BSE) to the appropriate Yahoo Finance suffix
+    and handles international tickers automatically.
+
+    Args:
+        ticker (str): The stock symbol (e.g., "RELIANCE", "INFY", "AAPL").
+        exchange (str): The primary exchange ("NSE", "BSE", or "GLOBAL"). Defaults to "NSE".
+
+    Returns:
+        Optional[Dict]: A dictionary containing price, change, percent_change, and currency,
+                        or None if the fetch fails.
     """
     try:
         # Map exchange to suffix
