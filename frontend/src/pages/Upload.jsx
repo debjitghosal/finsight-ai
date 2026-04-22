@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UploadCloud, File, X, Loader2, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
+import api from '../api';
 /**
  * UploadPage Component
  * 

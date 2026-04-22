@@ -12,6 +12,7 @@ import {
   Database,
   Cpu
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 /**
  * LandingPage Component
  * 
