@@ -1,6 +1,6 @@
 # FinSight AI: Advanced Financial Intelligence Engine
 
-[![CI/CD Pipeline](https://img.shields.io/github/actions/workflow/status/debjitghosal/finsight-ai/ci.yml?branch=main&label=CI%2FCD&logo=github)](https://github.com/debjitghosal/finsight-ai/actions)
+[![CI/CD Pipeline](https://github.com/debjitghosal/finsight-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/debjitghosal/finsight-ai/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Live Demo](https://img.shields.io/badge/Demo-Live-brightgreen.svg)](https://finsight-ai-smoky.vercel.app/)
 
