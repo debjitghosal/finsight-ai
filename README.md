@@ -1,19 +1,23 @@
 # FinSight AI: Advanced Financial Intelligence Engine
 
-**FinSight AI** is a production-grade financial report analyzer that converts complex, multi-hundred-page Annual Reports (PDFs) into structured, institutional-quality investment data. It leverages Google Gemini 1.5 Flash for high-speed, parallelized data extraction and zero-hallucination document Q&A.
+[![CI/CD Pipeline](https://img.shields.io/github/actions/workflow/status/your-repo/main.yml?branch=main&label=CI%2FCD&logo=github)](https://github.com/your-repo/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+**FinSight AI** is a production-grade financial report analyzer that converts complex, multi-hundred-page Annual Reports (PDFs) into structured, institutional-quality investment data. It leverages a hybrid AI architecture (Google Gemini 1.5 + Groq) for high-speed, parallelized data extraction and zero-hallucination document Q&A.
 
 ---
 
 ## 🚀 Key Features
 
+- **Hybrid AI Architecture**: Seamlessly toggles between **Google Gemini 1.5 Flash** for deep analysis and **Groq (Llama 3)** for ultra-fast, fail-safe fallback when quotas are reached.
 - **Full-PDF Deep Scan**: No page limits. The engine scans 100% of the document—from the opening letter to the deep notes in the financial statements.
 - **Blazing-Fast Parallel Extraction**: Utilizing a custom multi-threaded processing engine to perform specialized AI extractions (PnL, Balance Sheet, Risks, Summary) concurrently.
-- **Fortuna Global Assistant**: A dedicated global AI agent that remembers context across all your uploaded reports, allowing for cross-company comparisons and trend analysis.
+- **Boss AI (Global Portfolio Brain)**: A dedicated global AI agent that remembers context across all your uploaded reports, allowing for cross-company comparisons and trend analysis.
+- **Streaming Chatbot Interface**: Real-time, word-by-word streaming responses (Server-Sent Events) for a seamless, interactive research experience.
 - **Voice-Powered Financial Research**: Integrated **Speech-to-Text (Web Speech API)** allows users to query data hands-free. Perfect for quick institutional lookups.
-- **Zero-Hallucination Chatbot**: A document-bound Q&A system that utilizes the entire report context. It is strictly prohibited from using external knowledge, ensuring cited accuracy.
+- **Zero-Hallucination Q&A**: A document-bound system that utilizes the entire report context, strictly prohibited from using external knowledge to ensure cited accuracy.
 - **Institutional Investment Advice**: Generates "Buy/Hold/Avoid" recommendations with multi-paragraph justifications based on real valuation metrics.
-- **Multi-Key API Rotation**: Built-in support for multiple Gemini API keys to maximize throughput and avoid rate limiting.
-- **Professional Landing Experience**: A high-impact, glassmorphism-themed landing page designed to impress portfolio visitors.
+- **Professional Landing Experience**: A high-impact, glassmorphism-themed landing page designed for institutional users.
 
 ---
 
@@ -26,23 +30,28 @@ graph TD
     Auth -->|Dashboard| Console[Command Center]
     
     Console -->|Upload PDF| API[FastAPI Backend]
-    API -->|Async Task| PDF[pdfplumber Engine]
+    API -->|Async Task| PDF[pypdfium2 Engine]
     PDF -->|Extract All Pages| Text[Full Document Text]
     
-    subgraph Parallel AI Analysis
-        Text --> PnL[PnL Extraction]
-        Text --> BS[Balance Sheet Extraction]
-        Text --> High[Highlights & Risks]
-        Text --> Sum[Executive Summary]
+    subgraph Hybrid AI Analysis
+        Text --> Gemini[Gemini 1.5 Flash]
+        Gemini -->|Quota Limit| Groq[Groq Llama 3 Fallback]
+    end
+    
+    subgraph Parallel Extractors
+        Groq/Gemini --> PnL[PnL Extraction]
+        Groq/Gemini --> BS[Balance Sheet Extraction]
+        Groq/Gemini --> High[Highlights & Risks]
+        Groq/Gemini --> Sum[Executive Summary]
     end
     
     PnL & BS & High & Sum --> Merge[Synthesis Engine]
     Merge --> Insights[Investment Insight Gen]
-    Insights --> DB[(PostgreSQL/Neon)]
+    Insights --> DB[(PostgreSQL / Neon)]
     
     DB -->|Stream Results| Console
-    Console -->|Voice Query| Chat[Context-Bound Chatbot]
-    Chat -->|Fortuna Global Logic| Gemini[Gemini 1.5 Flash]
+    Console -->|Voice Query| Chat[Streaming Chatbot]
+    Chat -->|Portfolio Context| BossAI[Boss AI Assistant]
 ```
 
 ---
@@ -51,18 +60,17 @@ graph TD
 
 ### **Backend (Python)**
 - **Framework**: FastAPI (High-performance API)
-- **Database**: SQLAlchemy (ORM) with SQLite/Postgres
-- **PDF Extraction**: `pdfplumber` (Precise table & text positioning)
-- **AI Core**: `google-genai` (Gemini 1.5 Flash & Pro)
+- **Database**: SQLAlchemy (ORM) with PostgreSQL (Neon.tech)
+- **AI Core**: `google-genai` (Gemini 1.5) & `groq` (Llama 3 Fallback)
+- **PDF Extraction**: `pypdfium2` / `pdfplumber`
 - **Export Services**: `fpdf2` (PDF Reports) & `openpyxl` (Excel Models)
-- **Communication**: Twilio API (WhatsApp Integration)
 
 ### **Frontend (React)**
 - **Framework**: Vite + React
-- **Styling**: Vanilla CSS + Tailwind (Aesthetic Modern Dark Mode)
-- **Animations**: Framer Motion (Smooth stage transitions)
+- **Styling**: Vanilla CSS + Tailwind (Modern Glassmorphism)
+- **Animations**: Framer Motion
 - **Icons**: Lucide React
-- **Data Fetching**: Axios
+- **Data Fetching**: Axios + EventSource (Streaming)
 
 ---
 
@@ -79,14 +87,15 @@ pip install -r requirements.txt
 ### 2. Configuration (`.env`)
 Create a `.env` file in the `backend/` directory:
 ```env
-# REQUIRED: AI Configuration
-GEMINI_API_KEY=your_primary_key
-GEMINI_API_KEYS=key1,key2,key3 # Optional: Multiple keys for rotation
+# AI API Keys
+GEMINI_API_KEY=your_gemini_key
+GROQ_API_KEY=your_groq_key
 
-# OPTIONAL: WhatsApp Integration
-TWILIO_ACCOUNT_SID=...
-TWILIO_AUTH_TOKEN=...
-TWILIO_WHATSAPP_FROM=whatsapp:+...
+# Database
+DATABASE_URL=postgresql://user:pass@host/dbname
+
+# Optional: Multiple Gemini keys for rotation
+GEMINI_API_KEYS=key1,key2,key3
 ```
 
 ### 3. Frontend Setup
@@ -98,27 +107,15 @@ npm run dev
 
 ---
 
-## 🔑 AI Key Rotation System
-FinSight AI includes a unique `Thread-Safe API Rotator`. If you provide `GEMINI_API_KEYS` in your config, the system will automatically distribute requests across your keys. This allows for massive document processing without hitting the free-tier rate limits.
+## 🤖 CI/CD Workflow
+The project includes a robust GitHub Actions pipeline that ensures code quality:
+- **Linting**: Automated flake8 (Backend) and ESLint (Frontend) checks.
+- **Testing**: Parallel execution of unit tests.
+- **Type Checking**: Pydantic validation for all API schemas.
 
 ---
 
-## 🌐 Production Deployment
-
-This project is optimized for deployment on modern free-tier platforms:
-
-### **Frontend (Vite/React)**
-- **Platform**: [Vercel](https://vercel.com)
-- **Environment Variable**: `VITE_API_URL` (Point to your deployed backend URL)
-
-### **Backend (FastAPI)**
-- **Platform**: [Render](https://render.com) or [Railway](https://railway.app)
-- **Deployment**: Connect your GitHub repository and the system will automatically use the included `Dockerfile`.
-- **Database**: [Neon.tech](https://neon.tech) (Serverless PostgreSQL)
-
----
-
-## 🛡️ Data Integrity & Safety
+## 🛡️ Data Integrity
 The engine includes a **Stabilized Context Window** logic:
 - Up to **1,000,000 characters** of text are indexed per report.
 - AI prompts are specifically designed to return `{}` if data is not found, preventing "imaginary" financial metrics.
