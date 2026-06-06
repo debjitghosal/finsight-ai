@@ -4,21 +4,28 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Live Demo](https://img.shields.io/badge/Demo-Live-brightgreen.svg)](https://finsight-ai-smoky.vercel.app/)
 
-**FinSight AI** is a production-grade financial report analyzer that converts complex, multi-hundred-page Annual Reports (PDFs) into structured, institutional-quality investment data. It leverages a hybrid AI architecture (Google Gemini 1.5 + Groq) for high-speed, parallelized data extraction and zero-hallucination document Q&A.
+**FinSight AI** is a production-grade financial report analyzer that converts complex, multi-hundred-page Annual Reports (PDFs) into structured, institutional-quality investment data. It leverages a hybrid AI architecture using **Google Gemini 1.5 + Groq** for high-speed, parallelized data extraction and zero-hallucination document Q&A.
+
+🌐 **Live Application:** https://finsight-ai-smoky.vercel.app/
 
 ---
 
 ## 🚀 Key Features
 
-- **Hybrid AI Architecture**: Seamlessly toggles between **Google Gemini 1.5 Flash** for deep analysis and **Groq (Llama 3)** for ultra-fast, fail-safe fallback when quotas are reached.
-- **Full-PDF Deep Scan**: No page limits. The engine scans 100% of the document—from the opening letter to the deep notes in the financial statements.
-- **Blazing-Fast Parallel Extraction**: Utilizing a custom multi-threaded processing engine to perform specialized AI extractions (PnL, Balance Sheet, Risks, Summary) concurrently.
-- **Boss AI (Global Portfolio Brain)**: A dedicated global AI agent that remembers context across all your uploaded reports, allowing for cross-company comparisons and trend analysis.
-- **Streaming Chatbot Interface**: Real-time, word-by-word streaming responses (Server-Sent Events) for a seamless, interactive research experience.
-- **Voice-Powered Financial Research**: Integrated **Speech-to-Text (Web Speech API)** allows users to query data hands-free. Perfect for quick institutional lookups.
-- **Zero-Hallucination Q&A**: A document-bound system that utilizes the entire report context, strictly prohibited from using external knowledge to ensure cited accuracy.
-- **Institutional Investment Advice**: Generates "Buy/Hold/Avoid" recommendations with multi-paragraph justifications based on real valuation metrics.
-- **Professional Landing Experience**: A high-impact, glassmorphism-themed landing page designed for institutional users.
+- **Hybrid AI Architecture**: Seamlessly uses **Google Gemini 1.5 Flash** for deep document analysis and **Groq Llama 3** as a rapid fallback engine when quotas are reached or faster responses are needed.
+- **Large PDF Deep Scan**: Designed to support large financial reports and complex PDFs up to **1000 pages**, scanning content across the complete document.
+- **Multi-Report Comparison**: Compare multiple financial reports side-by-side, supporting up to **10 reports** for cross-period, cross-company, and trend-based analysis.
+- **Blazing-Fast Parallel Extraction**: Uses a multi-stage extraction pipeline to process Profit & Loss, Balance Sheet, risks, highlights, summaries, and financial metrics efficiently.
+- **Boss AI / Global Portfolio Brain**: A higher-level AI assistant that can reason across uploaded reports and support cross-company or multi-report comparison.
+- **Streaming Chatbot Interface**: Real-time, word-by-word streaming responses using **Server-Sent Events (SSE)** for a smooth interactive research experience.
+- **Voice-Powered Financial Research**: Supports speech-based interaction using speech-to-text capabilities, allowing users to query reports hands-free.
+- **Zero-Hallucination Q&A**: A document-bound Q&A system designed to answer only from uploaded report context and avoid unsupported claims.
+- **Investor-Focused Analysis**: Generates simplified insights, financial risks, key metrics, and investment-oriented summaries for decision-making.
+- **Professional PDF Export**: Exports a PDF report containing key metrics, insights, summaries, and visual analysis.
+- **Financial Visualizations**: Generates charts and dashboards for revenue, profit, assets, liabilities, debt, and other important financial indicators.
+- **WhatsApp Sharing Support**: Allows simplified summaries and reports to be shared through WhatsApp integration.
+- **Authentication & Persistence**: Includes user authentication, JWT-based security, and persistent report storage using PostgreSQL.
+- **Cloud & CI/CD Ready**: Built with deployed frontend/backend services, Google Cloud services, CI/CD workflows, and scalable infrastructure.
 
 ---
 
@@ -27,93 +34,273 @@
 ```mermaid
 graph TD
     Visitor((Visitor)) -->|Landing Page| UI[React Frontend]
-    UI -->|Login/Register| Auth[Auth Protocol]
-    Auth -->|Dashboard| Console[Command Center]
-    
-    Console -->|Upload PDF| API[FastAPI Backend]
-    API -->|Async Task| PDF[pypdfium2 Engine]
-    PDF -->|Extract All Pages| Text[Full Document Text]
-    
-    subgraph Hybrid AI Analysis
-        Text --> Gemini[Gemini 1.5 Flash]
-        Gemini -->|Quota Limit| Groq[Groq Llama 3 Fallback]
+    UI -->|Login / Register| Auth[Authentication Layer]
+    Auth -->|Dashboard Access| Console[Financial Command Center]
+
+    Console -->|Upload PDF Reports| API[FastAPI Backend]
+    API -->|Async Processing| PDF[pypdfium2 / pdfplumber / PyPDF2 Engine]
+    PDF -->|Extract Text, Tables & Financial Data| Text[Full Document Context]
+
+    subgraph Hybrid_AI_Analysis
+        Text --> Gemini[Google Gemini 1.5 Flash]
+        Gemini -->|Fallback / Speed Layer| Groq[Groq Llama 3]
+        Groq --> AIOut[AI Analysis Output]
+        Gemini --> AIOut
     end
-    
-    subgraph Parallel Extractors
-        Groq/Gemini --> PnL[PnL Extraction]
-        Groq/Gemini --> BS[Balance Sheet Extraction]
-        Groq/Gemini --> High[Highlights & Risks]
-        Groq/Gemini --> Sum[Executive Summary]
+
+    subgraph Parallel_Extractors
+        AIOut --> PnL[Profit & Loss Extraction]
+        AIOut --> BS[Balance Sheet Extraction]
+        AIOut --> Risk[Risk & Highlights Extraction]
+        AIOut --> Summary[Executive Summary]
+        AIOut --> Metrics[Financial Metrics]
     end
-    
-    PnL & BS & High & Sum --> Merge[Synthesis Engine]
-    Merge --> Insights[Investment Insight Gen]
+
+    PnL --> Merge[Synthesis Engine]
+    BS --> Merge
+    Risk --> Merge
+    Summary --> Merge
+    Metrics --> Merge
+
+    Merge --> Insights[Investment Insights & Visual Analysis]
     Insights --> DB[(PostgreSQL / Neon)]
-    
-    DB -->|Stream Results| Console
-    Console -->|Voice Query| Chat[Streaming Chatbot]
-    Chat -->|Portfolio Context| BossAI[Boss AI Assistant]
+
+    DB -->|Display Results| Console
+    Console -->|Ask Questions| Chat[Streaming AI Chatbot]
+    Chat -->|Report Context| BossAI[Boss AI Assistant]
+
+    Console -->|Export| PDFReport[PDF Report]
+    Console -->|Share| WhatsApp[WhatsApp Summary]
 ```
 
 ---
 
 ## 🛠️ Technology Stack
 
-| Layer | Technologies Used | Key Purpose for Demo |
+| Layer | Technologies Used | Purpose |
 | :--- | :--- | :--- |
-| **Frontend** | **React (Vite) + TypeScript** | Blazing-fast navigation and state management. |
-| **Styling** | **Vanilla CSS + Tailwind CSS** | Ultra-modern "Glassmorphism" & "Institutional" UI. |
-| **Animations** | **Framer Motion** | Silky-smooth transitions and entry effects (crucial for "wow" factor). |
-| **Visuals** | **Recharts + Lucide React** | Dynamic financial charting and high-precision iconography. |
-| **Backend** | **FastAPI (Python)** | High-performance asynchronous API for real-time data flow. |
-| **Database** | **PostgreSQL (Neon.tech)** | Serverless cloud database for user reports and analysis. |
-| **Real-time** | **SSE (Server-Sent Events)** | Enables the "word-by-word" typing effect in the AI chatbot. |
+| **Frontend** | React, Vite, TypeScript | Fast, modern, scalable user interface |
+| **Routing** | React Router DOM | Multi-page dashboard and navigation |
+| **Styling** | Tailwind CSS, Vanilla CSS | Responsive glassmorphism UI and professional layout |
+| **Animations** | Framer Motion | Smooth page transitions and interactive effects |
+| **Charts & Icons** | Recharts, Lucide React | Financial dashboards and clean iconography |
+| **Backend** | FastAPI, Python, Uvicorn | High-performance asynchronous backend |
+| **Database** | PostgreSQL on Neon.tech | Cloud database for users, reports, and analysis records |
+| **ORM** | SQLAlchemy | Structured database access and models |
+| **AI Models** | Google Gemini 1.5 Flash, Groq Llama 3 | Financial analysis, Q&A, summarization, and fallback intelligence |
+| **PDF Processing** | pypdfium2, pdfplumber, PyPDF2 | Text, table, and document extraction |
+| **Real-Time Chat** | Server-Sent Events | Streaming chatbot responses |
+| **Authentication** | Google OAuth, JWT, passlib, bcrypt | Secure login and protected user sessions |
+| **Financial Data** | yfinance | Market and ticker-based financial enrichment |
+| **Reports** | FPDF2, OpenPyXL | PDF reports and structured report generation |
+| **Communication** | Twilio | WhatsApp messaging support |
+| **Speech & Audio** | Google Cloud Speech, Google Cloud Text-to-Speech | Voice-based queries and audio capabilities |
+| **Cloud Services** | Google Cloud services | Scalable cloud support and AI infrastructure |
+| **CI/CD** | GitHub Actions | Automated checks and deployment workflow |
 
 ---
 
 ## ⚙️ Setup & Installation
 
-### 1. Backend Setup
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/debjitghosal/finsight-ai.git
+cd finsight-ai
+```
+
+---
+
+### 2. Backend Setup
+
 ```bash
 cd backend
 python -m venv venv
-source venv/bin/activate  # or venv\Scripts\activate on Windows
+```
+
+For Windows:
+
+```bash
+venv\Scripts\activate
+```
+
+For macOS/Linux:
+
+```bash
+source venv/bin/activate
+```
+
+Install dependencies:
+
+```bash
 pip install -r requirements.txt
 ```
 
-### 2. Configuration (`.env`)
-Create a `.env` file in the `backend/` directory:
+---
+
+### 3. Configuration
+
+Create a `.env` file inside the `backend/` directory:
+
 ```env
 # AI API Keys
 GEMINI_API_KEY=your_gemini_key
 GROQ_API_KEY=your_groq_key
 
-# Database
-DATABASE_URL=postgresql://user:pass@host/dbname
-
 # Optional: Multiple Gemini keys for rotation
 GEMINI_API_KEYS=key1,key2,key3
+
+# Database
+DATABASE_URL=postgresql://user:password@host/dbname
+
+# Authentication
+JWT_SECRET_KEY=your_jwt_secret
+JWT_ALGORITHM=HS256
+
+# Google OAuth
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+
+# Twilio / WhatsApp
+TWILIO_ACCOUNT_SID=your_twilio_sid
+TWILIO_AUTH_TOKEN=your_twilio_auth_token
+TWILIO_WHATSAPP_NUMBER=your_twilio_whatsapp_number
+
+# Optional App Config
+ENVIRONMENT=development
 ```
 
-### 3. Frontend Setup
+---
+
+### 4. Run Backend
+
+```bash
+uvicorn main:app --reload
+```
+
+Backend will usually run at:
+
+```text
+http://127.0.0.1:8000
+```
+
+---
+
+### 5. Frontend Setup
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
+🎥 **Demo Video:** https://drive.google.com/file/d/1L9e7fAIYI9PKNlsZhN6XKzCJGulYgR5G/view?usp=sharing
+
+Frontend will usually run at:
+
+```text
+http://localhost:5173
+```
+
 ---
 
 ## 🤖 CI/CD Workflow
-The project includes a robust GitHub Actions pipeline that ensures code quality:
-- **Linting**: Automated flake8 (Backend) and ESLint (Frontend) checks.
-- **Testing**: Parallel execution of unit tests.
-- **Type Checking**: Pydantic validation for all API schemas.
+
+The project includes a GitHub Actions workflow for automated quality checks and deployment readiness.
+
+- **Backend Checks**: Python dependency validation, linting, and API structure checks.
+- **Frontend Checks**: Build verification, TypeScript validation, and frontend dependency checks.
+- **Workflow Badge**: The CI/CD status badge is displayed at the top of this README.
+- **Deployment Readiness**: Designed for cloud deployment with separate frontend and backend services.
 
 ---
 
-## 🛡️ Data Integrity
-The engine includes a **Stabilized Context Window** logic:
-- Up to **1,000,000 characters** of text are indexed per report.
-- AI prompts are specifically designed to return `{}` if data is not found, preventing "imaginary" financial metrics.
-- All communications are encrypted, supporting institutional-grade security protocols.
+## 🛡️ Data Integrity & Reliability
+
+FinSight AI is designed to reduce hallucinations and improve financial reliability through:
+
+- **Document-bound AI responses** based on uploaded report content.
+- **Strict extraction prompts** that return empty values when data is unavailable instead of fabricating metrics.
+- **Large context indexing** for deep report scanning and long-document analysis.
+- **Hybrid model fallback** to improve uptime and response reliability.
+- **Database-backed persistence** for storing structured summaries, reports, and analysis outputs.
+- **Encrypted communication and authentication layers** for secure user access.
+
+---
+
+## 📊 What FinSight AI Can Analyze
+
+FinSight AI can work with:
+
+- Annual reports
+- Corporate filings
+- Balance sheets
+- Profit & loss statements
+- Cash flow statements
+- Order reports
+- Investor presentations
+- Financial PDFs
+- Multi-period company reports
+- Cross-company comparison documents
+
+---
+
+## 💡 Example Questions Users Can Ask
+
+- Is this company good for investment?
+- What are the major financial risks in this report?
+- Compare revenue growth across these reports.
+- Is debt increasing faster than profit?
+- What are the key highlights from the balance sheet?
+- Summarize this annual report in simple language.
+- What are the red flags investors should notice?
+- Compare assets, liabilities, revenue, and profit across uploaded reports.
+- Which company looks financially stronger based on the uploaded reports?
+- What are the most important financial ratios from this report?
+
+---
+
+## 📌 Project Purpose
+
+Financial documents are often long, complex, and difficult to interpret quickly. FinSight AI aims to make financial intelligence more accessible by converting dense reports into simplified summaries, visual insights, investor-focused analysis, and interactive AI-powered Q&A.
+
+The platform is built for:
+
+- Retail investors
+- Students
+- Analysts
+- Founders
+- Finance professionals
+- Investment researchers
+- FinTech teams
+- Data-driven decision makers
+
+---
+
+## 🔮 Future Enhancements
+
+- Improved ratio extraction and financial metric validation
+- More advanced multi-company benchmarking
+- Stronger market and ticker-based enrichment
+- Better PDF report styling and export templates
+- Advanced portfolio-level insights
+- More robust WhatsApp report delivery
+- Admin analytics dashboard
+- Role-based access for institutional users
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+## 👤 Author
+
+**Debjit Ghosal**
+
+🌐 **Live Project:** https://finsight-ai-smoky.vercel.app/  
+🎥 **Demo Video:** https://drive.google.com/file/d/1L9e7fAIYI9PKNlsZhN6XKzCJGulYgR5G/view?usp=sharing  
+
+---
